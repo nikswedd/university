@@ -1,5 +1,5 @@
 # university
 Repository for university studies
 
-Student: Shubarev Nikita Denisovich
+Student: Shubarev Nikita Denisovich  
 Group: EFBO-01-26
