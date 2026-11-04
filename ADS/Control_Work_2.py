@@ -1,7 +1,12 @@
-
+import time
 import math
+from collections import deque
+
+
+# Задание 1. НОД методом вычитания
 
 def gcd(a, b):
+    # Вычитаем меньшее число из большего до их равенства
     while a != b:
         if a > b:
             a -= b
@@ -11,61 +16,164 @@ def gcd(a, b):
 
 
 def task1():
-    nums = [int(input(f"Введите число {i+1}: ")) for i in range(4)]
+    nums = [int(input(f'Введите число {i+1}: ')) for i in range(4)]
 
+    # Последовательно находим НОД всех четырех чисел
     res = nums[0]
     for num in nums[1:]:
         res = gcd(res, num)
 
-    print(f"Наибольший общий делитель четырех чисел: {res}")
+    print(f'Наибольший общий делитель четырех чисел: {res}')
 
 
+# Задание 2. Факторизация числа
+def sieve(n):
+
+    marked = [True] * (n + 1)
+    marked[0] = marked[1] = False
+
+    # Вычеркиваем составные числа, начиная с квадрата простого
+    for i in range(2, math.isqrt(n) + 1):
+        if marked[i]:
+            for j in range(i * i, n + 1, i):
+                marked[j] = False
+
+    return marked
+
+
+
+# Наивный перебор делителей
 def factorize(n):
-    factors = {}
+    factors = []
     d = 2
 
+    # Делим число на найденный делитель до тех пор, пока это возможно
     while d * d <= n:
-        if n % d == 0:
-            count = 0
-            while n % d == 0:
-                count += 1
-                n //= d
-            factors[d] = count
-
-        d += 1 if d == 2 else 2
+        while n % d == 0:
+            factors.append(d)
+            n //= d
+        d += 1
 
     if n > 1:
-        factors[n] = 1
+        factors.append(n)
 
     return factors
 
 
+
+
+# Факторизация с помощью очереди
+def factor_queue(n):
+    factors = []
+    queue = deque([n])
+    while queue:
+        num = queue.popleft()
+
+        if num < 2:
+            continue
+
+        # Проверяем делимость на 2
+        if num % 2 == 0:
+            factors.append(2)
+            queue.append(num // 2)
+            continue
+
+        # Ищем нечётный делитель
+        d = 3
+        limit = math.isqrt(num)
+
+        while d <= limit:
+            if num % d == 0:
+                break
+            d += 2
+
+        if d <= limit:
+            queue.append(d)
+            queue.append(num // d)
+        else:
+            # Делителей нет — число простое
+            factors.append(num)
+
+    return sorted(factors)
+
+# Подсчет кратности множителей
+
+def counts(factors):
+    result = {}
+
+    # Считаем количество повторений каждого множителя
+    for p in factors:
+        result[p] = result.get(p, 0) + 1
+
+    return result
+
+
+# Проверка множителей на простоту
+
+def check(factors, primes):
+    for p in sorted(set(factors)):
+        print(f'{p} — {"простое" if primes[p] else "составное"}')
+
+
 def task2():
-    n = int(input("Введите целое положительное число для факторизации: "))
-    original_n = n
+    n = int(input('Введите целое положительное число: '))
 
-    factors = factorize(n)
+    if n < 2:
+        print('Число должно быть не меньше 2.')
+        return
 
-    print(f"Каноническое разложение числа {original_n}:")
-    factors_str = " * ".join(
-        [f"{p}^{c}" if c > 1 else str(p) for p, c in factors.items()]
-    )
-    print(f"{original_n} = {factors_str}\n")
+    # Замеряем время наивной факторизации
+    start = time.perf_counter()
+    f1 = factorize(n)
+    time1 = time.perf_counter() - start
 
+    # Замеряем время факторизации с помощью очереди
+    start = time.perf_counter()
+    f2 = factor_queue(n)
+    time2 = time.perf_counter() - start
+
+    # Подсчитываем кратность множителей
+    c1 = counts(f1)
+    c2 = counts(f2)
+
+    print('\nНаивная факторизация:')
+    print('Множители:', f1)
+    print('Каноническое разложение:', c1)
+    print(f'Время выполнения: {time1:.8f} секунд')
+
+    print('\nФакторизация с помощью очереди:')
+    print('Множители:', f2)
+    print('Каноническое разложение:', c2)
+    print(f'Время выполнения: {time2:.8f} секунд')
+
+    # Создаём решето для проверки простоты множителей
+    primes = sieve(n)
+
+    print('\nПроверка множителей на простоту:')
+    check(f1, primes)
+
+
+
+# Задание 3. Факторизация методом Ферма
 
 def fermat(n):
+    # Для четного числа сразу выделяем множитель 2
     if n % 2 == 0:
         return 2, n // 2
 
+    # Находим ближайшее целое число сверху от корня n
     m = math.isqrt(n)
     if m * m < n:
         m += 1
 
     x = 0
+
+    # Ищем представление n как разность квадратов
     while True:
         q = (m + x) ** 2 - n
         root = math.isqrt(q)
 
+        # Проверяем, является ли q полным квадратом
         if root * root == q:
             return m + x - root, m + x + root
 
@@ -73,78 +181,107 @@ def fermat(n):
 
 
 def task3():
-    n = int(input("Введите нечетное число для факторизации: "))
+    n = int(input('\nВведите нечетное число для факторизации: '))
 
     p1, p2 = fermat(n)
-    print(f"Результат разложения Ферма: {n} = {p1} * {p2}")
+    print(f'Результат разложения Ферма: {n} = {p1} * {p2}')
 
 
-def lucas_lehmer(p):
-    m = (1 << p) - 1
+
+
+# Задание 4. Тест Люка-Лемера
+def lucas(p):
+    # Вычисляем число Мерсенна
+    m = (2**p) - 1
     s = 4
 
-    for _ in range(p - 2):
+    # Строим последовательность с вычислением остатка
+    for i in range(p - 2):
         s = (s * s - 2) % m
 
     return s == 0
 
 
 def task4():
-    p = int(input("Введите показатель p для числа Мерсенна (M_p = 2^p - 1): "))
+    p = int(input('\nВведите показатель p для числа Мерсенна (M_p = 2^p - 1): '))
 
-    m = (1 << p) - 1
+    m = (2**p) - 1
 
-    if lucas_lehmer(p):
-        print(f"Число Мерсенна M_{p} ({m}) является ПРОСТЫМ.")
+    if p < 2:
+        print('Показатель p должен быть не меньше 2.')
+        return
+
+    if lucas(p):
+        print(f'Число Мерсенна M_{p} ({m}) является ПРОСТЫМ.')
     else:
-        print(f"Число Мерсенна M_{p} ({m}) является СОСТАВНЫМ.")
+        print(f'Число Мерсенна M_{p} ({m}) является СОСТАВНЫМ.')
 
 
-def von_neumann(seed, count=10):
-    sequence = []
+
+# Задание 5. Генератор фон Неймана
+def neumann(seed):
+    seq = []
+    count = 10
     current = seed
 
-    for _ in range(count):
-        squared_str = str(current ** 2).zfill(10)
-        current = int(squared_str[2:7])
-        sequence.append(current)
+    for jj in range(count):
+        # Возводим число в квадрат и дополняем до 10 цифр
+        squared = str(current ** 2).zfill(10)
 
-    return sequence
+        # Берем пять центральных цифр
+        current = int(squared[2:7])
+        seq.append(current)
+
+    return seq
 
 
 def task5():
-    seed = int(input("Введите начальное пятизначное число: "))
+    seed = int(input('\nВведите начальное пятизначное число: '))
 
-    seq = von_neumann(seed, 10)
-    print("Сгенерированная последовательность:", *seq)
+    if seed < 10000 or seed > 99999:
+        print('Число должно быть пятизначным.')
+        return
+
+    seq = neumann(seed)
+    print('Сгенерированная последовательность:', *seq)
 
 
+
+# Задание 6. Решето Сундарама
 def sundaram(n):
+    # Определяем размер массива
     k = (n - 1) // 2
     marked = [False] * (k + 1)
 
+    # Отмечаем составные числа по формуле Сундарама
     for i in range(1, k + 1):
         j = i
+
         while i + j + 2 * i * j <= k:
             marked[i + j + 2 * i * j] = True
             j += 1
 
     primes = []
+
+    # Число 2 добавляется отдельно
     if n >= 2:
         primes.append(2)
 
-    for idx in range(1, k + 1):
-        if not marked[idx]:
-            primes.append(2 * idx + 1)
+    # Получаем неотмеченные простые числа
+    for i in range(1, k + 1):
+        if not marked[i]:
+            primes.append(2 * i + 1)
 
     return primes
 
 
 def task6():
-    n = int(input("Введите верхнюю границу N: "))
+    n = int(input('\nВведите верхнюю границу N: '))
 
     primes = sundaram(n)
-    print(f"Простые числа до {n}: {primes}")
+    print(f'Простые числа до {n}: {primes}')
+
+
 
 
 task1()
