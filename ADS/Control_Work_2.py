@@ -1,4 +1,4 @@
-import time
+Import time
 import math
 from collections import deque
 from random import randint
@@ -46,13 +46,15 @@ def is_ferma_prime(n, k=10):
 # Задание 2. Факторизация числа
 
 # наивный метод
-def factorize(n):
+def factorize(n, split=False):
     factors = []
     if n < 2:
         return factors
 
     # Проверяем делимость на 2
     while n % 2 == 0:
+        if split:
+            return [2, n // 2]
         factors.append(2)
         n //= 2
 
@@ -60,6 +62,8 @@ def factorize(n):
     d = 3
     while d * d <= n:
         while n % d == 0:
+            if split:
+                return [d, n // d]
             factors.append(d)
             n //= d
         d += 2
@@ -82,8 +86,11 @@ def factor_queue(n):
             continue
 
         
-        sub_factors = factorize(num)
-        factors.extend(sub_factors)
+        res = factorize(num, True)
+        if len(res) == 1:
+            factors.append(res[0])
+        else:
+            queue.extend(res)
 
     return sorted(factors)
 
@@ -265,3 +272,4 @@ task3()
 task4()
 task5()
 task6()
+
