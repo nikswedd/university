@@ -156,7 +156,7 @@ def fermat(n):
         q = (m + x) ** 2 - n
         root = math.isqrt(q)
 
-        # Проверяем является ли q полным квадратом
+        # является ли q полным квадратом
         if root * root == q:
             p1 = m + x - root
             p2 = m + x + root
