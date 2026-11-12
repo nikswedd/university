@@ -134,7 +134,7 @@ def fermat(n):
     if n < 2 or is_ferma_prime(n):
         return [n]
 
-    # Для четного числа сразу выделяем множитель 2
+    # Для четного числа выносим множитель 2
     if n % 2 == 0:
         return fermat(2) + fermat(n // 2)
 
