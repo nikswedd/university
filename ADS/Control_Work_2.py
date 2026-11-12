@@ -81,7 +81,7 @@ def factor_queue(n):
         if num < 2:
             continue
 
-        # Используем наш оптимизированный наивный метод для факторизации числа из очереди
+        
         sub_factors = factorize(num)
         factors.extend(sub_factors)
 
