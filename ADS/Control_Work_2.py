@@ -88,16 +88,7 @@ def factor_queue(n):
     return sorted(factors)
 
 
-# Подсчет кратности множителей
 
-def counts(factors):
-    result = {}
-
-    # Считаем количество повторений каждого множителя
-    for p in factors:
-        result[p] = result.get(p, 0) + 1
-
-    return result
 
 
 # Проверка множителей на простоту
@@ -123,18 +114,13 @@ def task2():
     f2 = factor_queue(n)
     time2 = time.perf_counter() - start
 
-    # Подсчитываем кратность множителей
-    c1 = counts(f1)
-    c2 = counts(f2)
 
     print('\nНаивная факторизация:')
     print('Множители:', f1)
-    print('Каноническое разложение:', c1)
     print(f'Время выполнения: {time1:.8f} секунд')
 
-    print('\nФакторизация с помощью очереди:')
+    print('Факторизация с помощью очереди:')
     print('Множители:', f2)
-    print('Каноническое разложение:', c2)
     print(f'Время выполнения: {time2:.8f} секунд')
 
     print('\nПроверка множителей на простоту:')
