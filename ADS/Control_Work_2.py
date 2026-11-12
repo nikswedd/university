@@ -1,4 +1,4 @@
-Import time
+import time
 import math
 from collections import deque
 from random import randint
